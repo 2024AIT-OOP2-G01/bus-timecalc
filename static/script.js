@@ -21,25 +21,26 @@ async function fetchData() {
 
     // 適当に表示
     const jsonDataDiv = document.getElementById('jsonData');
+    //本来は現在時刻は含まれない
     jsonDataDiv.innerHTML = `
         <ul>
             <li><strong>現在時刻:</strong> ${data.currentTime}</li>
-            <li><strong>バス停までかかる時間:</strong> ${data.timeToBusStop} 分</li>
+            <li><strong>バス停までかかる時間:</strong> ${data.timeToBusStop} 秒</li>
             <li><strong>バスの出発時間:</strong> ${data.busDepartureTimes.join(", ")}</li>
-            <li><strong>バスの移動時間:</strong> ${data.busTravelTime} 分</li>
+            <li><strong>バスの移動時間:</strong> ${data.busTravelTime} 秒</li>
             <li><strong>電車の出発時間:</strong> ${data.trainDepartureTimes.join(", ")}</li>
         </ul>
     `;
 
     const nowStr = data.currentTime; // "HH:MM:SS"
-    const walkMinutes = data.timeToBusStop; // 徒歩時間 (分単位)
-    const busMinutes = data.busTravelTime; // バス移動 (分単位)
+    const walkMinutes = data.timeToBusStop; // 徒歩時間 (秒単位)
+    const busMinutes = data.busTravelTime; // バス移動 (秒単位)
     const busTimes = data.busDepartureTimes; // ["HH:MM:SS", ...]
     const trainTimes = data.trainDepartureTimes;
 
     // 徒歩・バス時間を秒に変換
-    const walkSeconds = walkMinutes * 60;
-    const busSeconds = busMinutes * 60;
+    const walkSeconds = walkMinutes;
+    const busSeconds = busMinutes;
 
     // 現在時刻を秒に変換
     const nowSeconds = toSeconds(nowStr);

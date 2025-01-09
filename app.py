@@ -11,9 +11,9 @@ def get_schedule():
     #現在時刻は13:00:00という設定　固定値から変更が必要
     response = {
         "currentTime": "13:00:00",
-        "timeToBusStop": 10,  # 徒歩10分
+        "timeToBusStop": 300,  # 徒歩5分
         "busDepartureTimes": ["13:15:00", "13:30:00", "13:45:00"],
-        "busTravelTime": 10,  # バス移動10分
+        "busTravelTime": 360,  # バス移動6分
         "trainDepartureTimes": ["14:00:00", "14:30:00"]
     }
     return jsonify(response)
