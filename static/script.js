@@ -17,6 +17,7 @@ function diffInSeconds(timeA, timeB) {
 async function fetchData() {
     // データ取得
     const response = await fetch('/get_schedule');
+    // TODO ここに増える
     const data = await response.json();
 
     // 適当に表示
@@ -25,18 +26,18 @@ async function fetchData() {
     jsonDataDiv.innerHTML = `
         <ul>
             <li><strong>現在時刻:</strong> ${data.currentTime}</li>
-            <li><strong>バス停までかかる時間:</strong> ${data.timeToBusStop} 秒</li>
-            <li><strong>バスの出発時間:</strong> ${data.busDepartureTimes.join(", ")}</li>
-            <li><strong>バスの移動時間:</strong> ${data.busTravelTime} 秒</li>
-            <li><strong>電車の出発時間:</strong> ${data.trainDepartureTimes.join(", ")}</li>
+            <li><strong>バス停までかかる時間:</strong> ${data.time_to_bus_stop} 秒</li>
+            <li><strong>バスの出発時間:</strong> ${data.bus_departure_times.join(", ")}</li>
+            <li><strong>バスの移動時間:</strong> ${data.bus_travel_time} 秒</li>
+            <li><strong>電車の出発時間:</strong> ${data.train_departure_time.join(", ")}</li>
         </ul>
     `;
 
     const nowStr = data.currentTime; // "HH:MM:SS"
-    const walkMinutes = data.timeToBusStop; // 徒歩時間 (秒単位)
-    const busMinutes = data.busTravelTime; // バス移動 (秒単位)
-    const busTimes = data.busDepartureTimes; // ["HH:MM:SS", ...]
-    const trainTimes = data.trainDepartureTimes;
+    const walkMinutes = data.time_to_bus_stop; // 徒歩時間 (秒単位)
+    const busMinutes = data.bus_travel_time; // バス移動 (秒単位)
+    const busTimes = data.bus_departure_times; // ["HH:MM:SS", ...]
+    const trainTimes = data.train_departure_time;
 
     // 徒歩・バス時間を秒に変換
     const walkSeconds = walkMinutes;
@@ -74,16 +75,26 @@ async function fetchData() {
         // x = (バス出発時刻 - 現在時刻) - walkSeconds(徒歩)
         const timeToLeave = (latestBusSeconds - nowSeconds) - walkSeconds;
 
-        if (timeToLeave < 0) {
+        // 時間が-2分以上なら次の電車へ
+        if (timeToLeave < -120) {
             continue;
         }
-
-        // 適当に表示
-        resultText = `
+        
+        // test
+        if (timeToLeave >= 0) {
+            resultText = `
             電車時刻: ${trainTime} に乗れる<br>
             バス発車時刻: ${latestBus} に乗れば良いから<br>
             今の場所を出発するまでの残り時間: ${Math.floor(timeToLeave / 60)} 分 ${timeToLeave % 60} 秒
         `;
+        }else{
+            resultText = `
+            電車時刻: ${trainTime} に乗れる<br>
+            バス発車時刻: ${latestBus} に乗れば良いから<br>
+            ギリ間に合わないかも...
+        `;
+        }
+        
         isTrainFound = true;
         break;
     }
