@@ -14,36 +14,50 @@ function diffInSeconds(timeA, timeB) {
     return toSeconds(timeA) - toSeconds(timeB);
 }
 
+function getCurrentTimeString() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+}
+
 async function fetchData() {
-    // データ取得
-    const response = await fetch('/get_schedule');
-    // TODO ここに増える
-    const data = await response.json();
+
+    const nowStr = getCurrentTimeString(); // "HH:MM"
+
+    // APIエンドポイントに現在時刻を付与してリクエスト
+    const bus_api_url = `https://ait-busdiaa-api.onrender.com/next-three?time=${nowStr}`;
+    const bus_response = await fetch(bus_api_url);
+    const bus_data = await bus_response.json(); // バスの時刻データ
+
+    const time_response = await fetch('/get_schedule');
+    const time_data = await time_response.json();
+
+    const next_train_url = `/api/aikann/yakusa_to_kouzouzi/next?time=${nowStr}`;
+    const next_train_response = await fetch(next_train_url);
+    const next_train_data = await next_train_response.json(); // 電車の時刻データ
+
+    // 電車時刻の結合
+    const trainTimes = [next_train_data.next_time, ...next_train_data.next_times];
+
+    // バス時刻
+    const busTimes = bus_data.next_three_times;
 
     // 適当に表示
     const jsonDataDiv = document.getElementById('jsonData');
     //本来は現在時刻は含まれない
     jsonDataDiv.innerHTML = `
         <ul>
-            <li><strong>現在時刻:</strong> ${data.currentTime}</li>
-            <li><strong>バス停までかかる時間:</strong> ${data.time_to_bus_stop} 秒</li>
-            <li><strong>バスの出発時間:</strong> ${data.bus_departure_times.join(", ")}</li>
-            <li><strong>バスの移動時間:</strong> ${data.bus_travel_time} 秒</li>
-            <li><strong>電車の出発時間:</strong> ${data.train_departure_time.join(", ")}</li>
+            <li><strong>バス停までかかる時間:</strong> ${time_data.time_to_bus_stop} 秒</li>
+            <li><strong>バスの出発時間:</strong> ${busTimes.join(", ")}</li>
+            <li><strong>バスの移動時間:</strong> 600 秒</li>
+            <li><strong>電車の出発時間:</strong> ${trainTimes.join(", ")}</li>
         </ul>
     `;
 
-    const nowStr = data.currentTime; // "HH:MM:SS"
-    const walkMinutes = data.time_to_bus_stop; // 徒歩時間 (秒単位)
-    const busMinutes = data.bus_travel_time; // バス移動 (秒単位)
-    const busTimes = data.bus_departure_times; // ["HH:MM:SS", ...]
-    const trainTimes = data.train_departure_time;
-
-    // 徒歩・バス時間を秒に変換
-    const walkSeconds = walkMinutes;
-    const busSeconds = busMinutes;
-
-    // 現在時刻を秒に変換
+    
+    const walkSeconds = Number(time_data.time_to_bus_stop); // 徒歩時間 (秒単位)
+    const busSeconds = 600; // バス移動 (秒単位)
     const nowSeconds = toSeconds(nowStr);
 
     let resultText = "";
