@@ -31,7 +31,7 @@ async function fetchData() {
     const bus_data = await bus_response.json(); // バスの時刻データ
 
     const time_response = await fetch('/get_schedule');
-    const time_data = await time_response.json();
+    const time_data = await time_response.json();//この部分を変更する必要がある
 
     const next_train_url = `/api/aikann/yakusa_to_kouzouzi/next?time=${nowStr}`;
     const next_train_response = await fetch(next_train_url);
@@ -42,19 +42,6 @@ async function fetchData() {
 
     // バス時刻
     const busTimes = bus_data.next_three_times;
-
-    // 適当に表示
-    const jsonDataDiv = document.getElementById('jsonData');
-    //本来は現在時刻は含まれない
-    jsonDataDiv.innerHTML = `
-        <ul>
-            <li><strong>バス停までかかる時間:</strong> ${time_data.time_to_bus_stop} 秒</li>
-            <li><strong>バスの出発時間:</strong> ${busTimes.join(", ")}</li>
-            <li><strong>バスの移動時間:</strong> 600 秒</li>
-            <li><strong>電車の出発時間:</strong> ${trainTimes.join(", ")}</li>
-        </ul>
-    `;
-
     
     const walkSeconds = Number(time_data.time_to_bus_stop); // 徒歩時間 (秒単位)
     const busSeconds = 600; // バス移動 (秒単位)
@@ -94,17 +81,13 @@ async function fetchData() {
             continue;
         }
         
-        // test
+        
         if (timeToLeave >= 0) {
             resultText = `
-            電車時刻: ${trainTime} に乗れる<br>
-            バス発車時刻: ${latestBus} に乗れば良いから<br>
-            今の場所を出発するまでの残り時間: ${Math.floor(timeToLeave / 60)} 分 ${timeToLeave % 60} 秒
+            ${Math.floor(timeToLeave / 60)}:${timeToLeave % 60}
         `;
         }else{
             resultText = `
-            電車時刻: ${trainTime} に乗れる<br>
-            バス発車時刻: ${latestBus} に乗れば良いから<br>
             ギリ間に合わないかも...
         `;
         }
